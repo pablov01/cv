@@ -1,0 +1,12 @@
+{
+    "name": "cv-builder",
+    "version": "1.0.0",
+    "description": "Editor de CV con exportación PDF y Canva",
+    "scripts": {
+        "start": "npx serve . -p 3000",
+        "dev": "npx serve . -p 3000 -s"
+    },
+    "keywords": ["cv", "resume", "pdf", "canva"],
+    "author": "Pablo Villalba",
+    "license": "MIT"
+}

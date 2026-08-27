@@ -1,0 +1,245 @@
+/* ================================================================
+   CV Template — Estilos del CV
+   Basado en el diseño original de Pablo Sebastián Villalba Araujo
+   ================================================================ */
+
+:root {
+    --acento:  #8c4a2f;
+    --papel:   #fbfaf7;
+    --tinta:   #1c1a17;
+    --cuerpo:  #34302a;
+    --suave:   #6b665e;
+    --linea:   #ddd8cf;
+    --guion:   #b9b2a6;
+    --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+    --sans:  'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ---------- Base ---------- */
+
+.cv-page {
+    font-family: var(--sans);
+    font-size: 10.2pt;
+    line-height: 1.5;
+    color: var(--tinta);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Encabezado ---------- */
+
+.encabezado { display: flex; gap: 7mm; align-items: flex-start; }
+
+.foto {
+    width: 30mm; height: 30mm;
+    flex-shrink: 0;
+    border-radius: 2px;
+    object-fit: cover;
+    filter: grayscale(100%) contrast(1.02);
+}
+
+.identidad { display: flex; flex-direction: column; gap: 2mm; flex-grow: 1; }
+
+h1 {
+    font-family: var(--serif);
+    font-size: 23pt;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+    margin: 0;
+}
+
+.cargo {
+    font-size: 11pt;
+    font-weight: 600;
+    color: var(--acento);
+    letter-spacing: 0.015em;
+}
+
+.contacto {
+    display: flex; flex-wrap: wrap;
+    gap: 1mm 4.5mm;
+    font-size: 9pt;
+    color: var(--suave);
+    margin-top: 0.8mm;
+}
+.contacto a { color: var(--suave); text-decoration: none; }
+.contacto a:hover { color: var(--acento); }
+
+.regla { height: 0.35mm; background: var(--linea); border: 0; margin: 0; }
+
+/* ---------- Perfil ---------- */
+
+.perfil { font-size: 10.4pt; line-height: 1.58; color: var(--cuerpo); text-wrap: pretty; }
+
+/* ---------- Secciones ---------- */
+
+section { display: flex; flex-direction: column; gap: 2.4mm; }
+
+h2 {
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--acento);
+    margin: 0;
+}
+
+.puesto { display: flex; flex-direction: column; gap: 1mm; }
+.puesto + .puesto { margin-top: 2.2mm; }
+
+.fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 5mm;
+}
+
+.empresa { font-family: var(--serif); font-size: 13.5pt; font-weight: 600; }
+.fecha   { font-size: 9pt; color: var(--suave); white-space: nowrap; }
+.rol     { font-size: 9.8pt; color: var(--suave); font-style: italic; }
+
+.proyecto { display: flex; flex-direction: column; gap: 0.8mm; }
+.proyecto + .proyecto { margin-top: 2.2mm; }
+.proyecto > .titulo { font-weight: 600; font-size: 9.8pt; }
+
+ul { list-style: none; margin: 1mm 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.9mm; }
+li { display: flex; gap: 2.4mm; color: var(--cuerpo); text-wrap: pretty; }
+li::before { content: "\2014"; color: var(--guion); flex-shrink: 0; }
+
+/* ---------- Stack ---------- */
+
+.stack {
+    display: grid;
+    grid-template-columns: 23mm 1fr;
+    gap: 1.4mm 5mm;
+    color: var(--cuerpo);
+}
+.stack dt { color: var(--suave); }
+.stack dd { margin: 0; }
+
+/* ---------- Formación ---------- */
+
+.formacion { display: flex; flex-direction: column; gap: 2mm; color: var(--cuerpo); }
+.formacion strong { font-weight: 600; }
+
+/* ---------- Links ---------- */
+
+.links-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3mm;
+}
+
+.link-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5mm;
+    padding: 1.2mm 3mm;
+    border: 0.3mm solid var(--linea);
+    border-radius: 1mm;
+    text-decoration: none;
+    color: var(--cuerpo);
+    font-size: 9pt;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.link-item:hover {
+    border-color: var(--acento);
+    color: var(--acento);
+}
+
+.link-icon {
+    width: 4mm;
+    height: 4mm;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+.link-icon svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.link-label {
+    white-space: nowrap;
+}
+
+/* ---------- Idiomas ---------- */
+
+.idiomas-section {
+    font-size: 9pt;
+    color: var(--suave);
+}
+
+/* ---------- Footer ---------- */
+
+.footer-line {
+    margin-top: auto;
+    padding-top: 3mm;
+    border-top: 0.35mm solid var(--linea);
+    display: flex;
+    justify-content: space-between;
+    gap: 5mm;
+    font-size: 9pt;
+    color: var(--suave);
+}
+
+/* ---------- Marcador de dato faltante ---------- */
+
+.falta {
+    background: #fdf2c4;
+    box-shadow: 0 0 0 0.5mm #fdf2c4;
+    border-radius: 1px;
+    color: #6b5a12;
+}
+
+/* ---------- Template: Clásica ---------- */
+.template-classic {
+    --acento: #1e293b;
+    --papel: #ffffff;
+}
+
+.template-classic h1 {
+    font-size: 22pt;
+    font-weight: 600;
+}
+
+.template-classic h2 {
+    border-bottom: 1px solid var(--linea);
+    padding-bottom: 1mm;
+}
+
+/* ---------- Template: Mínima ---------- */
+.template-minimal {
+    --acento: #374151;
+    --papel: #ffffff;
+    gap: 2.8mm;
+}
+
+.template-minimal h1 {
+    font-family: var(--sans);
+    font-size: 20pt;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+.template-minimal h2 {
+    letter-spacing: 0.08em;
+}
+
+.template-minimal .cargo {
+    color: var(--suave);
+    font-weight: 400;
+}
+
+/* ---------- Print ---------- */
+@media print {
+    .cv-section { border: none !important; }
+    .cv-section .section-controls { display: none !important; }
+    [contenteditable] { box-shadow: none !important; }
+}

@@ -1,0 +1,598 @@
+// ================================================================
+// Editor — Lógica del editor de CV
+// ================================================================
+
+const editor = {
+    data: null,
+    zoom: 1,
+    history: [],
+    historyIndex: -1,
+    modalState: null,
+    sortable: null,
+
+    init() {
+        const saved = this.loadData();
+        const defaults = getDefaultData();
+        this.data = saved ? this.mergeDefaults(saved, defaults) : defaults;
+        this.applyColor(this.data.color);
+        this.setTemplate(this.data.template);
+        renderCV(this.data);
+        this.initSortable();
+        this.pushHistory();
+    },
+
+    mergeDefaults(saved, defaults) {
+        // Agregar secciones que no existen en datos guardados
+        const mergedSections = [...new Set([...defaults.sections, ...saved.sections])];
+        saved.sections = mergedSections;
+
+        // Asegurar que existan las estructuras de datos por defecto
+        if (!saved.links) saved.links = defaults.links;
+        if (!saved.personal) saved.personal = defaults.personal;
+        if (!saved.skills) saved.skills = defaults.skills;
+        if (!saved.education) saved.education = defaults.education;
+        if (!saved.experience) saved.experience = defaults.experience;
+        if (!saved.projects) saved.projects = defaults.projects;
+
+        return saved;
+    },
+
+    // ---- Persistencia ----
+    loadData() {
+        try {
+            const raw = localStorage.getItem('cv-data');
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    },
+
+    saveData() {
+        localStorage.setItem('cv-data', JSON.stringify(this.data));
+    },
+
+    // ---- Historial ----
+    pushHistory() {
+        this.history = this.history.slice(0, this.historyIndex + 1);
+        this.history.push(JSON.parse(JSON.stringify(this.data)));
+        this.historyIndex = this.history.length - 1;
+        if (this.history.length > 50) {
+            this.history.shift();
+            this.historyIndex--;
+        }
+    },
+
+    undo() {
+        if (this.historyIndex > 0) {
+            this.historyIndex--;
+            this.data = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+            renderCV(this.data);
+            this.initSortable();
+            this.saveData();
+            this.toast('Deshacer');
+        }
+    },
+
+    redo() {
+        if (this.historyIndex < this.history.length - 1) {
+            this.historyIndex++;
+            this.data = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+            renderCV(this.data);
+            this.initSortable();
+            this.saveData();
+            this.toast('Rehacer');
+        }
+    },
+
+    // ---- Secciones ----
+    addSection(type) {
+        if (this.data.sections.includes(type)) return;
+        this.data.sections.push(type);
+
+        // Inicializar datos por defecto si no existen
+        if (type === 'certifications' && !this.data[type]) {
+            this.data[type] = [];
+        }
+
+        renderCV(this.data);
+        this.initSortable();
+        this.pushHistory();
+        this.saveData();
+    },
+
+    removeSection(type) {
+        if (!confirm(`¿Eliminar la sección "${SECTION_TYPES[type].name}"?`)) return;
+        this.data.sections = this.data.sections.filter(s => s !== type);
+        renderCV(this.data);
+        this.initSortable();
+        this.pushHistory();
+        this.saveData();
+        this.toast('Sección eliminada');
+    },
+
+    // ---- Sidebar ----
+    updateSidebarAvailable(data) {
+        const container = document.getElementById('available-sections');
+        container.innerHTML = '';
+
+        Object.entries(SECTION_TYPES).forEach(([type, info]) => {
+            if (info.singleton && data.sections.includes(type)) return;
+
+            const btn = document.createElement('button');
+            btn.className = 'section-btn';
+            btn.dataset.section = type;
+            btn.innerHTML = `<i class="${info.icon}"></i> ${info.name}`;
+            btn.onclick = () => this.addSection(type);
+            container.appendChild(btn);
+        });
+    },
+
+    updateSidebarActive(data) {
+        const container = document.getElementById('active-sections');
+        container.innerHTML = '';
+
+        data.sections.forEach(type => {
+            const info = SECTION_TYPES[type];
+            if (!info) return;
+
+            const item = document.createElement('div');
+            item.className = 'active-section-item';
+            item.dataset.section = type;
+            item.innerHTML = `
+                <i class="fas fa-grip-vertical drag-handle"></i>
+                <span class="section-name"><i class="${info.icon}" style="margin-right:6px;font-size:0.75rem"></i>${info.name}</span>
+                <button class="remove-btn" onclick="editor.removeSection('${type}')" title="Eliminar"><i class="fas fa-times"></i></button>
+            `;
+            container.appendChild(item);
+        });
+
+        // Sortable para reordenar en sidebar
+        if (this.sidebarSortable) this.sidebarSortable.destroy();
+        this.sidebarSortable = new Sortable(container, {
+            handle: '.drag-handle',
+            animation: 150,
+            onEnd: (evt) => {
+                const sections = Array.from(container.children).map(el => el.dataset.section);
+                this.data.sections = sections;
+                renderCV(this.data);
+                this.initSortable();
+                this.pushHistory();
+                this.saveData();
+            }
+        });
+    },
+
+    // ---- Drag & Drop en CV ----
+    initSortable() {
+        const page = document.getElementById('cv-page');
+        if (this.sortable) this.sortable.destroy();
+
+        this.sortable = new Sortable(page, {
+            handle: '.move-btn',
+            animation: 200,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: (evt) => {
+                const sections = Array.from(page.children)
+                    .filter(el => el.classList.contains('cv-section'))
+                    .map(el => el.dataset.section);
+                this.data.sections = sections;
+                this.updateSidebarActive(this.data);
+                this.pushHistory();
+                this.saveData();
+            }
+        });
+    },
+
+    // ---- Template ----
+    setTemplate(name) {
+        this.data.template = name;
+        const page = document.getElementById('cv-page');
+        page.className = `cv-page template-${name}`;
+
+        document.querySelectorAll('.template-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.template === name);
+        });
+
+        this.saveData();
+    },
+
+    // ---- Color ----
+    setColor(color) {
+        this.data.color = color;
+        this.applyColor(color);
+
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.style.background === color || rgbToHex(btn.style.backgroundColor) === color);
+        });
+
+        this.saveData();
+    },
+
+    applyColor(color) {
+        document.documentElement.style.setProperty('--acento', color);
+    },
+
+    // ---- Zoom ----
+    zoomIn() {
+        this.zoom = Math.min(this.zoom + 0.1, 2);
+        this.applyZoom();
+    },
+
+    zoomOut() {
+        this.zoom = Math.max(this.zoom - 0.1, 0.5);
+        this.applyZoom();
+    },
+
+    applyZoom() {
+        document.getElementById('cv-wrapper').style.transform = `scale(${this.zoom})`;
+        document.getElementById('zoom-level').textContent = Math.round(this.zoom * 100) + '%';
+    },
+
+    // ---- Reset ----
+    resetCV() {
+        if (!confirm('¿Reiniciar el CV? Se borrarán todos los cambios.')) return;
+        this.data = getDefaultData();
+        localStorage.removeItem('cv-data');
+        renderCV(this.data);
+        this.initSortable();
+        this.pushHistory();
+        this.applyColor(this.data.color);
+        this.setTemplate(this.data.template);
+        this.toast('CV reiniciado');
+    },
+
+    // ---- Modal ----
+    openModal(title, fields, currentValues, onSave, onDelete) {
+        this.modalState = { onSave, onDelete };
+        document.getElementById('modal-title').textContent = title;
+
+        const body = document.getElementById('modal-body');
+        body.innerHTML = '';
+
+        fields.forEach(field => {
+            const group = document.createElement('div');
+            group.className = 'form-group' + (field.row ? ' form-row' : '');
+
+            if (field.type === 'textarea') {
+                group.innerHTML = `
+                    <label>${field.label}</label>
+                    <textarea data-field="${field.key}" rows="${field.rows || 3}">${currentValues[field.key] || ''}</textarea>
+                `;
+            } else if (field.type === 'select') {
+                const opts = (field.options || []).map(o =>
+                    `<option value="${o.value}" ${currentValues[field.key] === o.value ? 'selected' : ''}>${o.label}</option>`
+                ).join('');
+                group.innerHTML = `
+                    <label>${field.label}</label>
+                    <select data-field="${field.key}">${opts}</select>
+                `;
+            } else if (field.type === 'list') {
+                group.innerHTML = `
+                    <label>${field.label}</label>
+                    <div data-field="${field.key}" class="list-editor">
+                        ${(currentValues[field.key] || []).map((item, i) => `
+                            <div class="list-item" style="display:flex;gap:6px;margin-bottom:6px;">
+                                <input type="text" value="${escapeHtml(item)}" data-index="${i}" style="flex:1">
+                                <button class="btn btn-danger" onclick="this.parentElement.remove()" style="padding:6px 10px;font-size:0.8rem">✕</button>
+                            </div>
+                        `).join('')}
+                        <button class="btn btn-cancel" onclick="editor.addListItem(this)" style="font-size:0.8rem;padding:6px 12px;margin-top:4px">+ Agregar</button>
+                    </div>
+                `;
+            } else {
+                group.innerHTML = `
+                    <label>${field.label}</label>
+                    <input type="${field.type || 'text'}" data-field="${field.key}" value="${escapeHtml(currentValues[field.key] || '')}" placeholder="${field.placeholder || ''}">
+                `;
+            }
+
+            body.appendChild(group);
+        });
+
+        document.getElementById('edit-modal').style.display = 'flex';
+
+        // Agregar botón de eliminar si hay callback
+        const footer = document.querySelector('.modal-footer');
+        const existingDelete = footer.querySelector('.btn-danger');
+        if (existingDelete) existingDelete.remove();
+
+        if (onDelete) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-danger';
+            deleteBtn.textContent = 'Eliminar';
+            deleteBtn.onclick = onDelete;
+            footer.insertBefore(deleteBtn, footer.firstChild);
+        }
+    },
+
+    addListItem(btn) {
+        const list = btn.parentElement;
+        const items = list.querySelectorAll('.list-item');
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.style.cssText = 'display:flex;gap:6px;margin-bottom:6px;';
+        div.innerHTML = `
+            <input type="text" value="" data-index="${items.length}" style="flex:1">
+            <button class="btn btn-danger" onclick="this.parentElement.remove()" style="padding:6px 10px;font-size:0.8rem">✕</button>
+        `;
+        list.insertBefore(div, btn);
+        div.querySelector('input').focus();
+    },
+
+    closeModal() {
+        document.getElementById('edit-modal').style.display = 'none';
+        this.modalState = null;
+    },
+
+    saveModal() {
+        if (!this.modalState) return;
+
+        const values = {};
+        document.querySelectorAll('#modal-body .form-group').forEach(group => {
+            const key = group.querySelector('[data-field]')?.dataset.field;
+            if (!key) return;
+
+            const field = group.querySelector('[data-field]');
+            if (field.tagName === 'TEXTAREA') {
+                values[key] = field.value;
+            } else if (field.classList.contains('list-editor')) {
+                values[key] = Array.from(field.querySelectorAll('input'))
+                    .map(input => input.value)
+                    .filter(v => v.trim());
+            } else {
+                values[key] = field.value;
+            }
+        });
+
+        this.modalState.onSave(values);
+        this.closeModal();
+        renderCV(this.data);
+        this.initSortable();
+        this.pushHistory();
+        this.saveData();
+    },
+
+    // ---- Edit methods ----
+    editPersonal() {
+        const d = this.data.personal;
+        this.openModal('Editar Datos Personales', [
+            { key: 'name', label: 'Nombre completo', placeholder: 'Tu nombre' },
+            { key: 'title', label: 'Cargo / Título', placeholder: 'Desarrollador Full Stack' },
+            { key: 'location', label: 'Ubicación', placeholder: 'Ciudad, País' },
+            { key: 'phone', label: 'Teléfono', placeholder: '+595 ...' },
+            { key: 'email', label: 'Email', type: 'email' },
+            { key: 'github', label: 'GitHub (usuario)', placeholder: 'usuario' },
+            { key: 'linkedin', label: 'LinkedIn (usuario)', placeholder: 'usuario' },
+        ], d, (vals) => {
+            Object.assign(this.data.personal, vals);
+        });
+    },
+
+    editProfile() {
+        this.openModal('Editar Perfil', [
+            { key: 'profile', label: 'Descripción profesional', type: 'textarea', rows: 5 },
+        ], { profile: this.data.profile }, (vals) => {
+            this.data.profile = vals.profile;
+        });
+    },
+
+    // ---- Experience (per-entry) ----
+    editExperienceEntry(index) {
+        const exp = this.data.experience[index];
+        if (!exp) return;
+
+        this.openModal('Editar Experiencia — ' + (exp.company || 'Nueva'), [
+            { key: 'company', label: 'Empresa' },
+            { key: 'role', label: 'Cargo / Rol' },
+            { key: 'startDate', label: 'Fecha inicio', placeholder: '2022' },
+            { key: 'endDate', label: 'Fecha fin', placeholder: 'actual' },
+            { key: 'projects', label: 'Proyectos (sub-secciones)', type: 'list' },
+        ], {
+            company: exp.company,
+            role: exp.role,
+            startDate: exp.startDate,
+            endDate: exp.endDate,
+            projects: exp.projects ? exp.projects.map(p => p.title || p).filter(Boolean) : [],
+        }, (vals) => {
+            this.data.experience[index].company = vals.company;
+            this.data.experience[index].role = vals.role;
+            this.data.experience[index].startDate = vals.startDate;
+            this.data.experience[index].endDate = vals.endDate;
+            // Reconstruir projects desde la lista de strings
+            if (vals.projects && vals.projects.length) {
+                this.data.experience[index].projects = vals.projects.map(title => ({
+                    title: title,
+                    bullets: [''],
+                }));
+            }
+        }, () => {
+            // Callback de eliminar
+            if (confirm('¿Eliminar esta experiencia?')) {
+                this.data.experience.splice(index, 1);
+                this.closeModal();
+                renderCV(this.data);
+                this.initSortable();
+                this.pushHistory();
+                this.saveData();
+            }
+        });
+    },
+
+    addExperienceEntry() {
+        this.data.experience.push({
+            company: '',
+            role: '',
+            startDate: '',
+            endDate: '',
+            projects: [{ title: '', bullets: [''] }],
+        });
+        renderCV(this.data);
+        this.initSortable();
+        this.pushHistory();
+        this.saveData();
+        // Abrir directamente la nueva entrada
+        this.editExperienceEntry(this.data.experience.length - 1);
+    },
+
+    // ---- Projects (per-entry) ----
+    editProjectsEntry(index) {
+        const proj = this.data.projects[index];
+        if (!proj) return;
+
+        this.openModal('Editar Proyecto — ' + (proj.name || 'Nuevo'), [
+            { key: 'name', label: 'Nombre del proyecto' },
+            { key: 'role', label: 'Descripción', type: 'textarea', rows: 2 },
+            { key: 'startDate', label: 'Fecha inicio' },
+            { key: 'endDate', label: 'Fecha fin' },
+            { key: 'bullets', label: 'Detalles', type: 'list' },
+        ], proj, (vals) => {
+            Object.assign(this.data.projects[index], vals);
+        }, () => {
+            if (confirm('¿Eliminar este proyecto?')) {
+                this.data.projects.splice(index, 1);
+                this.closeModal();
+                renderCV(this.data);
+                this.initSortable();
+                this.pushHistory();
+                this.saveData();
+            }
+        });
+    },
+
+    addProjectsEntry() {
+        this.data.projects.push({
+            name: '',
+            role: '',
+            startDate: '',
+            endDate: '',
+            bullets: [''],
+        });
+        renderCV(this.data);
+        this.initSortable();
+        this.pushHistory();
+        this.saveData();
+        this.editProjectsEntry(this.data.projects.length - 1);
+    },
+
+    // ---- Education (per-entry) ----
+    editEducationEntry(index) {
+        const ed = this.data.education[index];
+        if (!ed) return;
+
+        this.openModal('Editar Formación — ' + (ed.degree || 'Nueva'), [
+            { key: 'degree', label: 'Título / Grado' },
+            { key: 'school', label: 'Institución' },
+            { key: 'startDate', label: 'Fecha inicio' },
+            { key: 'endDate', label: 'Fecha fin' },
+        ], ed, (vals) => {
+            Object.assign(this.data.education[index], vals);
+        }, () => {
+            if (confirm('¿Eliminar esta formación?')) {
+                this.data.education.splice(index, 1);
+                this.closeModal();
+                renderCV(this.data);
+                this.initSortable();
+                this.pushHistory();
+                this.saveData();
+            }
+        });
+    },
+
+    addEducationEntry() {
+        this.data.education.push({
+            degree: '',
+            school: '',
+            startDate: '',
+            endDate: '',
+        });
+        renderCV(this.data);
+        this.initSortable();
+        this.pushHistory();
+        this.saveData();
+        this.editEducationEntry(this.data.education.length - 1);
+    },
+
+    // ---- Links (per-entry) ----
+    editLinksEntry(index) {
+        const link = (this.data.links || [])[index] || {};
+        this.openModal('Editar Link — ' + (link.label || 'Nuevo'), [
+            { key: 'label', label: 'Nombre', placeholder: 'GitHub' },
+            { key: 'url', label: 'URL', placeholder: 'https://...' },
+            { key: 'icon', label: 'Tipo de ícono', type: 'select', options: [
+                { value: 'github', label: 'GitHub' },
+                { value: 'linkedin', label: 'LinkedIn' },
+                { value: 'portfolio', label: 'Portafolio / Web' },
+                { value: 'cert', label: 'Certificado' },
+            ]},
+        ], link, (vals) => {
+            if (!this.data.links) this.data.links = [];
+            if (this.data.links[index]) {
+                Object.assign(this.data.links[index], vals);
+            } else {
+                this.data.links.push(vals);
+            }
+        }, () => {
+            if (confirm('¿Eliminar este link?')) {
+                this.data.links.splice(index, 1);
+                this.closeModal();
+                renderCV(this.data);
+                this.initSortable();
+                this.pushHistory();
+                this.saveData();
+            }
+        });
+    },
+
+    addLinksEntry() {
+        if (!this.data.links) this.data.links = [];
+        this.data.links.push({ label: '', url: '', icon: 'portfolio' });
+        renderCV(this.data);
+        this.initSortable();
+        this.pushHistory();
+        this.saveData();
+        this.editLinksEntry(this.data.links.length - 1);
+    },
+
+    editSkills() {
+        const skills = this.data.skills;
+        const fields = Object.entries(skills).map(([cat]) => ({
+            key: cat, label: cat,
+        }));
+
+        this.openModal('Editar Stack / Habilidades', fields, skills, (vals) => {
+            this.data.skills = vals;
+        });
+    },
+
+    editLanguages() {
+        this.openModal('Editar Idiomas', [
+            { key: 'languages', label: 'Idiomas', placeholder: 'Español nativo · Inglés B2' },
+        ], { languages: this.data.languages }, (vals) => {
+            this.data.languages = vals.languages;
+        });
+    },
+
+    // ---- Toast ----
+    toast(msg) {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    },
+};
+
+// ---- Helpers ----
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function rgbToHex(rgb) {
+    if (!rgb || rgb.startsWith('#')) return rgb;
+    const match = rgb.match(/\d+/g);
+    if (!match || match.length < 3) return rgb;
+    return '#' + match.slice(0, 3).map(n => (+n).toString(16).padStart(2, '0')).join('');
+}

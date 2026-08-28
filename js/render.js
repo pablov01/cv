@@ -24,6 +24,7 @@ function renderSection(type, data) {
     const controls = document.createElement('div');
     controls.className = 'section-controls';
     controls.innerHTML = `
+        <button class="section-control-btn edit-btn" title="Editar sección" onclick="editor.editSection('${type}')"><i class="fas fa-pen"></i></button>
         <button class="section-control-btn move-btn" title="Mover"><i class="fas fa-grip-vertical"></i></button>
         <button class="section-control-btn delete-btn" title="Eliminar sección" onclick="editor.removeSection('${type}')"><i class="fas fa-times"></i></button>
     `;
@@ -298,6 +299,42 @@ function renderLinks(data) {
 function renderCertifications(data) {
     const section = document.createElement('section');
     section.innerHTML = '<h2>Certificaciones</h2>';
+
+    const div = document.createElement('div');
+    div.className = 'formacion';
+
+    (data.certifications || []).forEach((cert, i) => {
+        const row = document.createElement('div');
+        row.className = 'fila';
+        row.style.position = 'relative';
+        row.innerHTML = `
+            <span><strong>${cert.title || '<span class="falta">[CERTIFICACIÓN]</span>'}</strong>
+                ${cert.issuer ? `<span class="cert-issuer">${cert.issuer}</span>` : ''}</span>
+            <span class="fecha">${cert.year || ''}</span>
+        `;
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'entry-edit-btn';
+        editBtn.title = 'Editar esta certificación';
+        editBtn.innerHTML = '<i class="fas fa-pen"></i>';
+        editBtn.onclick = (e) => { e.stopPropagation(); editor.editCertificationsEntry(i); };
+        row.appendChild(editBtn);
+
+        div.appendChild(row);
+    });
+
+    section.appendChild(div);
+
+    const addBtn = createAddButton('Agregar certificación', () => editor.addCertificationsEntry());
+    section.appendChild(addBtn);
+
+    section.addEventListener('dblclick', () => {
+        if ((data.certifications || []).length > 0) {
+            editor.editCertificationsEntry(0);
+        } else {
+            editor.addCertificationsEntry();
+        }
+    });
     return section;
 }
 

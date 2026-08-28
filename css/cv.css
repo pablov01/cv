@@ -27,7 +27,7 @@
 
 /* ---------- Encabezado ---------- */
 
-.encabezado { display: flex; gap: 7mm; align-items: flex-start; }
+.encabezado { display: flex; gap: 7mm; align-items: flex-start; min-width: 0; }
 
 .foto {
     width: 30mm; height: 30mm;
@@ -37,7 +37,7 @@
     filter: grayscale(100%) contrast(1.02);
 }
 
-.identidad { display: flex; flex-direction: column; gap: 2mm; flex-grow: 1; }
+.identidad { display: flex; flex-direction: column; gap: 2mm; flex-grow: 1; min-width: 0; }
 
 h1 {
     font-family: var(--serif);
@@ -69,11 +69,11 @@ h1 {
 
 /* ---------- Perfil ---------- */
 
-.perfil { font-size: 10.4pt; line-height: 1.58; color: var(--cuerpo); text-wrap: pretty; }
+.perfil { font-size: 10.4pt; line-height: 1.58; color: var(--cuerpo); text-wrap: pretty; overflow-wrap: anywhere; word-break: break-word; }
 
 /* ---------- Secciones ---------- */
 
-section { display: flex; flex-direction: column; gap: 2.4mm; }
+section { display: flex; flex-direction: column; gap: 2.4mm; min-width: 0; }
 
 h2 {
     font-size: 8pt;
@@ -84,7 +84,7 @@ h2 {
     margin: 0;
 }
 
-.puesto { display: flex; flex-direction: column; gap: 1mm; }
+.puesto { display: flex; flex-direction: column; gap: 1mm; min-width: 0; }
 .puesto + .puesto { margin-top: 2.2mm; }
 
 .fila {
@@ -92,18 +92,32 @@ h2 {
     justify-content: space-between;
     align-items: baseline;
     gap: 5mm;
+    min-width: 0;
 }
 
-.empresa { font-family: var(--serif); font-size: 13.5pt; font-weight: 600; }
+.fila > span { min-width: 0; }
+
+.empresa {
+    font-family: var(--serif); font-size: 13.5pt; font-weight: 600;
+    overflow-wrap: anywhere; word-break: break-word;
+}
 .fecha   { font-size: 9pt; color: var(--suave); white-space: nowrap; }
-.rol     { font-size: 9.8pt; color: var(--suave); font-style: italic; }
+.rol     { font-size: 9.8pt; color: var(--suave); font-style: italic; overflow-wrap: anywhere; }
 
-.proyecto { display: flex; flex-direction: column; gap: 0.8mm; }
+.proyecto { display: flex; flex-direction: column; gap: 0.8mm; min-width: 0; }
 .proyecto + .proyecto { margin-top: 2.2mm; }
-.proyecto > .titulo { font-weight: 600; font-size: 9.8pt; }
+.proyecto > .titulo { font-weight: 600; font-size: 9.8pt; overflow-wrap: anywhere; }
 
-ul { list-style: none; margin: 1mm 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.9mm; }
-li { display: flex; gap: 2.4mm; color: var(--cuerpo); text-wrap: pretty; }
+ul { list-style: none; margin: 1mm 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.9mm; min-width: 0; }
+li {
+    display: flex;
+    gap: 2.4mm;
+    color: var(--cuerpo);
+    text-wrap: pretty;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
 li::before { content: "\2014"; color: var(--guion); flex-shrink: 0; }
 
 /* ---------- Stack ---------- */
@@ -113,14 +127,16 @@ li::before { content: "\2014"; color: var(--guion); flex-shrink: 0; }
     grid-template-columns: 23mm 1fr;
     gap: 1.4mm 5mm;
     color: var(--cuerpo);
+    min-width: 0;
 }
 .stack dt { color: var(--suave); }
-.stack dd { margin: 0; }
+.stack dd { margin: 0; min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
 
 /* ---------- Formación ---------- */
 
-.formacion { display: flex; flex-direction: column; gap: 2mm; color: var(--cuerpo); }
+.formacion { display: flex; flex-direction: column; gap: 2mm; color: var(--cuerpo); min-width: 0; }
 .formacion strong { font-weight: 600; }
+.cert-issuer { color: var(--suave); font-size: 9pt; margin-left: 2mm; }
 
 /* ---------- Links ---------- */
 

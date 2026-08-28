@@ -33,6 +33,7 @@ const editor = {
         if (!saved.education) saved.education = defaults.education;
         if (!saved.experience) saved.experience = defaults.experience;
         if (!saved.projects) saved.projects = defaults.projects;
+        if (!saved.certifications) saved.certifications = defaults.certifications || [];
 
         return saved;
     },
@@ -106,6 +107,28 @@ const editor = {
         this.pushHistory();
         this.saveData();
         this.toast('Sección eliminada');
+    },
+
+    editSection(type) {
+        const entryCount = {
+            experience: (this.data.experience || []).length,
+            projects: (this.data.projects || []).length,
+            education: (this.data.education || []).length,
+            links: (this.data.links || []).length,
+            certifications: (this.data.certifications || []).length,
+        }[type];
+
+        switch (type) {
+            case 'personal':        this.editPersonal(); break;
+            case 'profile':         this.editProfile(); break;
+            case 'experience':      entryCount ? this.editExperienceEntry(0) : this.addExperienceEntry(); break;
+            case 'projects':        entryCount ? this.editProjectsEntry(0) : this.addProjectsEntry(); break;
+            case 'skills':          this.editSkills(); break;
+            case 'education':       entryCount ? this.editEducationEntry(0) : this.addEducationEntry(); break;
+            case 'languages':       this.editLanguages(); break;
+            case 'links':           entryCount ? this.editLinksEntry(0) : this.addLinksEntry(); break;
+            case 'certifications':  entryCount ? this.editCertificationsEntry(0) : this.addCertificationsEntry(); break;
+        }
     },
 
     // ---- Sidebar ----
@@ -569,6 +592,39 @@ const editor = {
         ], { languages: this.data.languages }, (vals) => {
             this.data.languages = vals.languages;
         });
+    },
+
+    // ---- Certifications (per-entry) ----
+    editCertificationsEntry(index) {
+        const cert = this.data.certifications[index];
+        if (!cert) return;
+
+        this.openModal('Editar Certificación — ' + (cert.title || 'Nueva'), [
+            { key: 'title', label: 'Certificación / Acreditación' },
+            { key: 'issuer', label: 'Institución / Emisor' },
+            { key: 'year', label: 'Año' },
+        ], cert, (vals) => {
+            Object.assign(this.data.certifications[index], vals);
+        }, () => {
+            if (confirm('¿Eliminar esta certificación?')) {
+                this.data.certifications.splice(index, 1);
+                this.closeModal();
+                renderCV(this.data);
+                this.initSortable();
+                this.pushHistory();
+                this.saveData();
+            }
+        });
+    },
+
+    addCertificationsEntry() {
+        if (!this.data.certifications) this.data.certifications = [];
+        this.data.certifications.push({ title: '', issuer: '', year: '' });
+        renderCV(this.data);
+        this.initSortable();
+        this.pushHistory();
+        this.saveData();
+        this.editCertificationsEntry(this.data.certifications.length - 1);
     },
 
     // ---- Toast ----

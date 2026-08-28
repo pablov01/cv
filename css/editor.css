@@ -322,6 +322,11 @@ body {
     display: flex;
     flex-direction: column;
     gap: 3.6mm;
+    overflow-wrap: anywhere;
+}
+
+#cv-page > .cv-section {
+    min-width: 0;
 }
 
 /* ==================== CV EDIT OVERRIDES ==================== */

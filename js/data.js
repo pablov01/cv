@@ -159,6 +159,7 @@ function getDefaultData() {
                 endDate: '2020',
             }
         ],
+        certifications: [],
         languages: 'Español nativo · Inglés ',
         links: [
             { label: 'GitHub', url: 'https://github.com/pablov01', icon: 'github' },

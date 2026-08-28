@@ -4,16 +4,7 @@
 
 function exportCanvasImage() {
     const page = document.getElementById('cv-page');
-    const originalTransform = document.getElementById('cv-wrapper').style.transform;
-
-    // Quitar zoom
-    document.getElementById('cv-wrapper').style.transform = 'scale(1)';
-
-    // Ocultar controles
-    page.querySelectorAll('.section-controls').forEach(el => el.style.display = 'none');
-    page.querySelectorAll('.cv-section').forEach(el => {
-        el.style.border = 'none';
-    });
+    const restore = prepareExport();
 
     const overlay = createLoadingOverlay('Generando imagen para Canva...');
 
@@ -26,7 +17,7 @@ function exportCanvasImage() {
         height: page.scrollHeight,
     }).then(canvas => {
         overlay.remove();
-        document.getElementById('cv-wrapper').style.transform = originalTransform;
+        restore();
 
         // Crear enlace de descarga
         const link = document.createElement('a');
@@ -38,7 +29,7 @@ function exportCanvasImage() {
         editor.toast('Imagen exportada. Importa en Canva como imagen.');
     }).catch(err => {
         overlay.remove();
-        document.getElementById('cv-wrapper').style.transform = originalTransform;
+        restore();
         editor.toast('Error al generar imagen');
         console.error(err);
     });
@@ -47,11 +38,7 @@ function exportCanvasImage() {
 // Alternativa: exportar como SVG (mejor para Canva)
 function exportCanvasSVG() {
     const page = document.getElementById('cv-page');
-    const originalTransform = document.getElementById('cv-wrapper').style.transform;
-
-    document.getElementById('cv-wrapper').style.transform = 'scale(1)';
-    page.querySelectorAll('.section-controls').forEach(el => el.style.display = 'none');
-    page.querySelectorAll('.cv-section').forEach(el => { el.style.border = 'none'; });
+    const restore = prepareExport();
 
     const overlay = createLoadingOverlay('Generando SVG...');
 
@@ -61,7 +48,7 @@ function exportCanvasSVG() {
         backgroundColor: '#fbfaf7',
     }).then(canvas => {
         overlay.remove();
-        document.getElementById('cv-wrapper').style.transform = originalTransform;
+        restore();
 
         // Convertir canvas a SVG embebido
         const imgData = canvas.toDataURL('image/png', 1.0);
@@ -82,7 +69,7 @@ function exportCanvasSVG() {
         editor.toast('SVG exportado para Canva');
     }).catch(err => {
         overlay.remove();
-        document.getElementById('cv-wrapper').style.transform = originalTransform;
+        restore();
         editor.toast('Error al generar SVG');
         console.error(err);
     });

@@ -185,31 +185,40 @@ const editor = {
 
     // ---- Drag & Drop en CV ----
     initSortable() {
-        const page = document.getElementById('cv-page');
-        if (this.sortable) this.sortable.destroy();
+        const host = document.getElementById('cv-pages');
+        if (this.sortable) {
+            this.sortable.forEach(s => { if (s) s.destroy(); });
+            this.sortable = [];
+        }
 
-        this.sortable = new Sortable(page, {
-            handle: '.move-btn',
-            animation: 200,
-            ghostClass: 'sortable-ghost',
-            chosenClass: 'sortable-chosen',
-            onEnd: (evt) => {
-                const sections = Array.from(page.children)
-                    .filter(el => el.classList.contains('cv-section'))
-                    .map(el => el.dataset.section);
-                this.data.sections = sections;
-                this.updateSidebarActive(this.data);
-                this.pushHistory();
-                this.saveData();
-            }
-        });
+        this.sortable = Array.from(host.querySelectorAll(':scope > .cv-page')).map(page =>
+            new Sortable(page, {
+                handle: '.move-btn',
+                group: 'cv-sections',
+                animation: 200,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                onEnd: () => {
+                    const order = [];
+                    host.querySelectorAll(':scope > .cv-page > .cv-section').forEach(el => {
+                        const type = el.dataset.section;
+                        if (order[order.length - 1] !== type) order.push(type);
+                    });
+                    if (order.length) this.data.sections = order;
+                    this.updateSidebarActive(this.data);
+                    this.pushHistory();
+                    this.saveData();
+                }
+            })
+        );
     },
 
     // ---- Template ----
     setTemplate(name) {
         this.data.template = name;
-        const page = document.getElementById('cv-page');
-        page.className = `cv-page template-${name}`;
+        document.querySelectorAll('#cv-pages > .cv-page').forEach(p => {
+            p.className = 'cv-page template-' + name;
+        });
 
         document.querySelectorAll('.template-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.template === name);
@@ -603,6 +612,7 @@ const editor = {
             { key: 'title', label: 'Certificación / Acreditación' },
             { key: 'issuer', label: 'Institución / Emisor' },
             { key: 'year', label: 'Año' },
+            { key: 'url', label: 'URL del certificado (opcional)', placeholder: 'https://...', type: 'url' },
         ], cert, (vals) => {
             Object.assign(this.data.certifications[index], vals);
         }, () => {
@@ -619,7 +629,7 @@ const editor = {
 
     addCertificationsEntry() {
         if (!this.data.certifications) this.data.certifications = [];
-        this.data.certifications.push({ title: '', issuer: '', year: '' });
+        this.data.certifications.push({ title: '', issuer: '', year: '', url: '' });
         renderCV(this.data);
         this.initSortable();
         this.pushHistory();

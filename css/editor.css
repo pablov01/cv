@@ -307,25 +307,33 @@ body {
 /* ==================== CV PAGE WRAPPER ==================== */
 #cv-wrapper {
     width: 210mm;
-    min-height: 297mm;
-    background: #fbfaf7;
-    box-shadow: 0 2px 18px rgba(0,0,0,0.14);
     position: relative;
     transition: transform 0.2s;
     transform-origin: top center;
 }
 
-#cv-page {
+/* Contenedor de hojas paginadas */
+.cv-pages {
     width: 210mm;
-    min-height: 297mm;
+    display: flex;
+    flex-direction: column;
+    gap: 8mm;
+}
+
+.cv-page {
+    width: 210mm;
+    height: 297mm;
+    flex-shrink: 0;
     padding: 12mm 14mm 9mm;
     display: flex;
     flex-direction: column;
     gap: 3.6mm;
     overflow-wrap: anywhere;
+    background: var(--papel, #fbfaf7);
+    box-shadow: 0 2px 18px rgba(0,0,0,0.14);
 }
 
-#cv-page > .cv-section {
+.cv-pages > .cv-page > .cv-section {
     min-width: 0;
 }
 

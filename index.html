@@ -9,11 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Source+Sans+3:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/editor.css?v=3">
-    <link rel="stylesheet" href="css/cv.css?v=3">
+    <link rel="stylesheet" href="css/editor.css?v=6">
+    <link rel="stylesheet" href="css/cv.css?v=6">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div id="app">
@@ -116,8 +117,8 @@
 
             <div class="cv-container">
                 <div id="cv-wrapper">
-                    <div id="cv-page" class="cv-page template-modern">
-                        <!-- El CV se renderiza dinámicamente aquí -->
+                    <div id="cv-pages" class="cv-pages">
+                        <!-- El CV se renderiza dinámicamente aquí, paginado en hojas A4 -->
                     </div>
                 </div>
             </div>
@@ -142,11 +143,11 @@
     <!-- Input JSON oculto -->
     <input type="file" id="json-input" accept=".json" style="display:none" onchange="handleJSONLoad(event)">
 
-    <script src="js/data.js?v=3"></script>
-    <script src="js/editor.js?v=3"></script>
-    <script src="js/render.js?v=3"></script>
-    <script src="js/export-pdf.js?v=3"></script>
-    <script src="js/export-canvas.js?v=3"></script>
-    <script src="js/app.js?v=3"></script>
+    <script src="js/data.js?v=6"></script>
+    <script src="js/editor.js?v=6"></script>
+    <script src="js/render.js?v=6"></script>
+    <script src="js/export-pdf.js?v=6"></script>
+    <script src="js/export-canvas.js?v=6"></script>
+    <script src="js/app.js?v=6"></script>
 </body>
 </html>

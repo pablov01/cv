@@ -138,6 +138,25 @@ li::before { content: "\2014"; color: var(--guion); flex-shrink: 0; }
 .formacion strong { font-weight: 600; }
 .cert-issuer { color: var(--suave); font-size: 9pt; margin-left: 2mm; }
 
+/* ---------- Enlace de certificación ---------- */
+
+.cert-link {
+    color: var(--acento);
+    text-decoration: none;
+    border-bottom: 0.25mm solid currentColor;
+    overflow-wrap: anywhere;
+}
+
+.cert-link:hover { border-bottom-style: solid; opacity: 0.85; }
+
+.cert-link .cert-link-icon {
+    display: inline-block;
+    width: 3.2mm;
+    height: 3.2mm;
+    margin-left: 1.6mm;
+    vertical-align: -0.4mm;
+}
+
 /* ---------- Links ---------- */
 
 .links-grid {
@@ -255,6 +274,8 @@ li::before { content: "\2014"; color: var(--guion); flex-shrink: 0; }
 
 /* ---------- Print ---------- */
 @media print {
+    .cv-pages { gap: 0; }
+    .cv-page { box-shadow: none; break-after: page; }
     .cv-section { border: none !important; }
     .cv-section .section-controls { display: none !important; }
     [contenteditable] { box-shadow: none !important; }

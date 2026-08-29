@@ -4,6 +4,15 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     editor.init();
+
+    // Al cargar las fuentes web las alturas cambian: re-paginar para
+    // que cada hoja A4 quede exacta en el renderizado.
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+            renderCV(editor.data);
+            editor.initSortable();
+        });
+    }
 });
 
 // ---- Guardar / Cargar JSON ----

@@ -448,6 +448,11 @@ body {
     pointer-events: auto;
 }
 
+.link-item-wrapper:hover .entry-edit-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 .entry-edit-btn:hover {
     background: #1d4ed8;
     transform: scale(1.15);

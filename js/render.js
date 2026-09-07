@@ -375,6 +375,10 @@ function renderLinks(data) {
     allLinks.forEach((link, i) => {
         const iconSvg = LINK_ICONS[link.icon] || LINK_ICONS.portfolio;
 
+        const wrapper = document.createElement('div');
+        wrapper.className = 'link-item-wrapper';
+        wrapper.style.cssText = 'position:relative;display:inline-flex;';
+
         const item = document.createElement(link.url ? 'a' : 'span');
         item.className = 'link-item';
         if (link.url) {
@@ -383,7 +387,7 @@ function renderLinks(data) {
             item.rel = 'noopener';
             item.title = link.url;
         } else {
-            item.title = 'Sin URL — doble clic para editar';
+            item.title = 'Sin URL — clic en lápiz para editar';
         }
 
         item.innerHTML = `
@@ -404,7 +408,16 @@ function renderLinks(data) {
             editor.editLinksEntry(i);
         });
 
-        grid.appendChild(item);
+        const editBtn = document.createElement('button');
+        editBtn.className = 'entry-edit-btn';
+        editBtn.title = 'Editar este link';
+        editBtn.innerHTML = '<i class="fas fa-pen"></i>';
+        editBtn.style.cssText = 'top:-6px;right:-6px;';
+        editBtn.onclick = (e) => { e.stopPropagation(); editor.editLinksEntry(i); };
+        wrapper.appendChild(item);
+        wrapper.appendChild(editBtn);
+
+        grid.appendChild(wrapper);
     });
 
     // Botón agregar
@@ -416,7 +429,7 @@ function renderLinks(data) {
 
     section.addEventListener('dblclick', () => {
         if (allLinks.length > 0) {
-            editor.editLinksEntry(0);
+            editor.chooseLinksEntry();
         } else {
             editor.addLinksEntry();
         }

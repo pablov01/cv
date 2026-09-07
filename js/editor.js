@@ -126,7 +126,7 @@ const editor = {
             case 'skills':          this.editSkills(); break;
             case 'education':       entryCount ? this.editEducationEntry(0) : this.addEducationEntry(); break;
             case 'languages':       this.editLanguages(); break;
-            case 'links':           entryCount ? this.editLinksEntry(0) : this.addLinksEntry(); break;
+            case 'links':           entryCount ? this.chooseLinksEntry() : this.addLinksEntry(); break;
             case 'certifications':  entryCount ? this.editCertificationsEntry(0) : this.addCertificationsEntry(); break;
         }
     },
@@ -572,6 +572,50 @@ const editor = {
                 this.saveData();
             }
         });
+    },
+
+    chooseLinksEntry() {
+        const links = this.data.links || [];
+        if (links.length === 1) {
+            this.editLinksEntry(0);
+            return;
+        }
+        // Modal selector para elegir qué link editar
+        const body = document.getElementById('modal-body');
+        document.getElementById('modal-title').textContent = 'Editar Links — seleccionar';
+        body.innerHTML = `
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                ${links.map((link, i) => `
+                    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;">
+                        <span style="flex:1;min-width:0;">
+                            <strong>${escapeHtml(link.label) || '<em style=color:#94a3b8>Sin nombre</em>'}</strong>
+                            <span style="color:#64748b;font-size:0.82rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(link.url) || '<em>Sin URL</em>'}</span>
+                        </span>
+                        <span style="font-size:0.75rem;color:#94a3b8;text-transform:capitalize;">${escapeHtml(link.icon)}</span>
+                        <button class="btn btn-save" style="padding:6px 12px;font-size:0.82rem;white-space:nowrap;" onclick="editor.closeModal(); editor.editLinksEntry(${i})"><i class="fas fa-pen"></i> Editar</button>
+                    </div>
+                `).join('')}
+                <button class="btn btn-cancel" style="margin-top:4px;" onclick="editor.closeModal(); editor.addLinksEntry()"><i class="fas fa-plus"></i> Agregar link</button>
+            </div>
+        `;
+        // Sin onSave, solo selector
+        this.modalState = null;
+        const footer = document.querySelector('.modal-footer');
+        const deleteBtn = footer.querySelector('.btn-danger');
+        if (deleteBtn) deleteBtn.remove();
+        // Ocultar botón Guardar en modo selector
+        const saveBtn = footer.querySelector('.btn-save');
+        if (saveBtn) saveBtn.style.display = 'none';
+        // Mostrar modal y restaurar Guardar al cerrar
+        document.getElementById('edit-modal').style.display = 'flex';
+        // Monkey-patch closeModal para restaurar footer
+        const origClose = this.closeModal.bind(this);
+        this.closeModal = () => {
+            document.getElementById('edit-modal').style.display = 'none';
+            this.modalState = null;
+            if (saveBtn) saveBtn.style.display = '';
+            this.closeModal = origClose;
+        };
     },
 
     addLinksEntry() {

@@ -272,6 +272,159 @@ li::before { content: "\2014"; color: var(--guion); flex-shrink: 0; }
     font-weight: 400;
 }
 
+/* ---------- Template: Harvard ---------- */
+.template-harvard {
+    --acento: #1e293b;
+    --papel: #faf8f5;
+    --serif: 'Merriweather', Georgia, 'Times New Roman', serif;
+    --sans: 'Source Sans 3', 'Libre Franklin', system-ui, sans-serif;
+}
+
+.template-harvard h1 {
+    font-family: var(--serif);
+    font-size: 22pt;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+    color: var(--acento);
+}
+
+.template-harvard h2 {
+    font-family: var(--serif);
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--acento);
+    border-bottom: 1px solid var(--linea);
+    padding-bottom: 1mm;
+    margin-top: 2mm;
+}
+
+.template-harvard .cargo {
+    font-size: 11pt;
+    font-weight: 600;
+    color: var(--acento);
+    letter-spacing: 0.015em;
+}
+
+.template-harvard .contacto {
+    font-size: 9pt;
+    color: var(--suave);
+    margin-top: 0.8mm;
+}
+
+.template-harvard .puesto + .puesto {
+    margin-top: 3mm;
+}
+
+.template-harvard .proyecto + .proyecto {
+    margin-top: 3mm;
+}
+
+.template-harvard .stack {
+    grid-template-columns: 25mm 1fr;
+}
+
+.template-harvard .links-grid {
+    gap: 2mm;
+}
+
+.template-harvard .link-item {
+    padding: 1mm 2mm;
+    font-size: 8pt;
+    border: 0.25mm solid var(--linea);
+    border-radius: 0.5mm;
+}
+
+.template-harvard .link-item:hover {
+    border-color: var(--acento);
+    color: var(--acento);
+}
+
+/* ---------- Template: Elegante ---------- */
+.template-elegant {
+    --acento: #7c3aed;
+    --papel: #faf5ff;
+    --serif: 'Merriweather', Georgia, 'Times New Roman', serif;
+    --sans: 'Source Sans 3', system-ui, sans-serif;
+}
+
+.template-elegant h1 {
+    font-family: var(--serif);
+    font-size: 24pt;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--acento);
+    margin-bottom: 1mm;
+}
+
+.template-elegant h2 {
+    font-family: var(--serif);
+    font-size: 10pt;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--acento);
+    border-left: 3mm solid var(--acento);
+    padding-left: 1mm;
+    margin-top: 2mm;
+}
+
+.template-elegant .cargo {
+    font-size: 12pt;
+    font-weight: 500;
+    color: var(--acento);
+}
+
+.template-elegant .contacto {
+    font-size: 9pt;
+    color: var(--suave);
+    margin-top: 0.5mm;
+}
+
+/* ---------- Template: Creativa ---------- */
+.template-creative {
+    --acento: #dc2626;
+    --papel: #fff;
+    --serif: 'Inter', system-ui, sans-serif;
+    --sans: 'Source Sans 3', system-ui, sans-serif;
+}
+
+.template-creative h1 {
+    font-family: var(--serif);
+    font-size: 26pt;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--acento);
+    text-transform: uppercase;
+    margin-bottom: 2mm;
+}
+
+.template-creative h2 {
+    font-family: var(--serif);
+    font-size: 11pt;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--acento);
+    margin-top: 2mm;
+    padding-top: 1mm;
+    border-top: 1px solid var(--acento);
+}
+
+.template-creative .cargo {
+    font-size: 11pt;
+    font-weight: 500;
+    color: var(--acento);
+}
+
+.template-creative .contacto {
+    font-size: 9pt;
+    color: var(--suave);
+    margin-top: 0.5mm;
+}
+
 /* ---------- Print ---------- */
 @media print {
     .cv-pages { gap: 0; }

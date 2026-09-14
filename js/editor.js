@@ -10,15 +10,54 @@ const editor = {
     modalState: null,
     sortable: null,
 
+    getStorageKey() {
+        const lang = (typeof currentLang !== 'undefined' ? currentLang : 'es');
+        return 'cv-data-' + lang;
+    },
     init() {
+        const lang = (typeof currentLang !== 'undefined' ? currentLang : 'es');
+        // migración: si existe clave antigua cv-data sin sufijo, moverla a es
+        try {
+            const legacy = localStorage.getItem('cv-data');
+            if (legacy && !localStorage.getItem('cv-data-es')) {
+                localStorage.setItem('cv-data-es', legacy);
+            }
+        } catch {}
         const saved = this.loadData();
-        const defaults = getDefaultData();
+        const defaults = getDefaultData(lang);
         this.data = saved ? this.mergeDefaults(saved, defaults) : defaults;
         this.applyColor(this.data.color);
         this.setTemplate(this.data.template);
         renderCV(this.data);
         this.initSortable();
         this.pushHistory();
+    },
+    reloadForCurrentLang() {
+        // usado al cambiar idioma: descarta historial y carga datos del nuevo idioma
+        this.history = [];
+        this.historyIndex = -1;
+        const lang = (typeof currentLang !== 'undefined' ? currentLang : 'es');
+        const saved = this.loadData();
+        const defaults = getDefaultData(lang);
+        this.data = saved ? this.mergeDefaults(saved, defaults) : defaults;
+        this.applyColor(this.data.color);
+        this.setTemplate(this.data.template);
+        renderCV(this.data);
+        this.initSortable();
+        this.pushHistory();
+        this.saveData();
+        // Re-paginar tras layout/fonts — igual que en app.js init — evita que
+        // projects salte a 2ª hoja dejando hueco en 1ª al medir antes de pintar
+        requestAnimationFrame(() => {
+            renderCV(this.data);
+            this.initSortable();
+        });
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(() => {
+                renderCV(this.data);
+                this.initSortable();
+            });
+        }
     },
 
     mergeDefaults(saved, defaults) {
@@ -38,16 +77,16 @@ const editor = {
         return saved;
     },
 
-    // ---- Persistencia ----
+    // ---- Persistencia (por idioma) ----
     loadData() {
         try {
-            const raw = localStorage.getItem('cv-data');
+            const raw = localStorage.getItem(this.getStorageKey());
             return raw ? JSON.parse(raw) : null;
         } catch { return null; }
     },
 
     saveData() {
-        localStorage.setItem('cv-data', JSON.stringify(this.data));
+        localStorage.setItem(this.getStorageKey(), JSON.stringify(this.data));
     },
 
     // ---- Historial ----
@@ -100,7 +139,8 @@ const editor = {
     },
 
     removeSection(type) {
-        if (!confirm(`¿Eliminar la sección "${SECTION_TYPES[type].name}"?`)) return;
+        const nm = (typeof getSectionName !== 'undefined' ? getSectionName(type) : SECTION_TYPES[type].name);
+        if (!confirm(`¿Eliminar la sección "${nm}"?`)) return;
         this.data.sections = this.data.sections.filter(s => s !== type);
         renderCV(this.data);
         this.initSortable();
@@ -142,7 +182,8 @@ const editor = {
             const btn = document.createElement('button');
             btn.className = 'section-btn';
             btn.dataset.section = type;
-            btn.innerHTML = `<i class="${info.icon}"></i> ${info.name}`;
+            const labelAvail = (typeof getSectionName !== 'undefined' ? getSectionName(type) : info.name);
+            btn.innerHTML = `<i class="${info.icon}"></i> ${labelAvail}`;
             btn.onclick = () => this.addSection(type);
             container.appendChild(btn);
         });
@@ -159,9 +200,10 @@ const editor = {
             const item = document.createElement('div');
             item.className = 'active-section-item';
             item.dataset.section = type;
+            const labelActive = (typeof getSectionName !== 'undefined' ? getSectionName(type) : info.name);
             item.innerHTML = `
                 <i class="fas fa-grip-vertical drag-handle"></i>
-                <span class="section-name"><i class="${info.icon}" style="margin-right:6px;font-size:0.75rem"></i>${info.name}</span>
+                <span class="section-name"><i class="${info.icon}" style="margin-right:6px;font-size:0.75rem"></i>${labelActive}</span>
                 <button class="remove-btn" onclick="editor.removeSection('${type}')" title="Eliminar"><i class="fas fa-times"></i></button>
             `;
             container.appendChild(item);
@@ -262,8 +304,11 @@ const editor = {
     // ---- Reset ----
     resetCV() {
         if (!confirm('¿Reiniciar el CV? Se borrarán todos los cambios.')) return;
-        this.data = getDefaultData();
-        localStorage.removeItem('cv-data');
+        const lang = (typeof currentLang !== 'undefined' ? currentLang : 'es');
+        this.data = getDefaultData(lang);
+        localStorage.removeItem(this.getStorageKey());
+        // también limpiar clave legada si estamos en es
+        if (lang === 'es') try { localStorage.removeItem('cv-data'); } catch {}
         renderCV(this.data);
         this.initSortable();
         this.pushHistory();

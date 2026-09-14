@@ -208,7 +208,7 @@ function renderProfile(data) {
 // ---- Experience ----
 function renderExperience(data) {
     const section = document.createElement('section');
-    section.innerHTML = '<h2>Experiencia</h2>';
+    section.innerHTML = '<h2>' + (typeof i18n !== 'undefined' ? i18n('cv.sections.experience','Experiencia') : 'Experiencia') + '</h2>';
 
     data.experience.forEach((exp, i) => {
         const job = document.createElement('div');
@@ -256,7 +256,7 @@ function renderExperience(data) {
 // ---- Projects ----
 function renderProjects(data) {
     const section = document.createElement('section');
-    section.innerHTML = '<h2>Proyecto propio</h2>';
+    section.innerHTML = '<h2>' + (typeof i18n !== 'undefined' ? i18n('cv.sections.projects','Proyecto propio') : 'Proyecto propio') + '</h2>';
 
     data.projects.forEach((proj, i) => {
         const el = document.createElement('div');
@@ -292,7 +292,7 @@ function renderProjects(data) {
 // ---- Skills ----
 function renderSkills(data) {
     const section = document.createElement('section');
-    section.innerHTML = '<h2>Stack</h2>';
+    section.innerHTML = '<h2>' + (typeof i18n !== 'undefined' ? i18n('cv.sections.skills','Stack') : 'Stack') + '</h2>';
 
     const dl = document.createElement('dl');
     dl.className = 'stack';
@@ -309,7 +309,7 @@ function renderSkills(data) {
 // ---- Education ----
 function renderEducation(data) {
     const section = document.createElement('section');
-    section.innerHTML = '<h2>Formación</h2>';
+    section.innerHTML = '<h2>' + (typeof i18n !== 'undefined' ? i18n('cv.sections.education','Formación') : 'Formación') + '</h2>';
 
     const div = document.createElement('div');
     div.className = 'formacion';
@@ -345,10 +345,12 @@ function renderEducation(data) {
 // ---- Languages ----
 function renderLanguages(data) {
     const section = document.createElement('section');
+    const langLabel = typeof i18n !== 'undefined' ? i18n('cv.sections.languages','Idiomas') : 'Idiomas';
+    const refLabel = typeof i18n !== 'undefined' ? i18n('referencia','Referencias a solicitud') : 'Referencias a solicitud';
     section.innerHTML = `
         <div class="footer-line">
-            <span>Idiomas: ${data.languages || '<span class="falta">[IDIOMAS]</span>'}</span>
-            <span>Referencias a solicitud</span>
+            <span>${langLabel}: ${data.languages || '<span class="falta">[IDIOMAS]</span>'}</span>
+            <span>${refLabel}</span>
         </div>
     `;
     section.addEventListener('dblclick', () => editor.editLanguages());
@@ -365,7 +367,7 @@ const LINK_ICONS = {
 
 function renderLinks(data) {
     const section = document.createElement('section');
-    section.innerHTML = '<h2>Links</h2>';
+    section.innerHTML = '<h2>' + (typeof i18n !== 'undefined' ? i18n('cv.sections.links','Links') : 'Links') + '</h2>';
 
     const grid = document.createElement('div');
     grid.className = 'links-grid';
@@ -440,7 +442,7 @@ function renderLinks(data) {
 // ---- Certifications ----
 function renderCertifications(data) {
     const section = document.createElement('section');
-    section.innerHTML = '<h2>Certificaciones</h2>';
+    section.innerHTML = '<h2>' + (typeof i18n !== 'undefined' ? i18n('cv.sections.certifications','Certificaciones') : 'Certificaciones') + '</h2>';
 
     const div = document.createElement('div');
     div.className = 'formacion';

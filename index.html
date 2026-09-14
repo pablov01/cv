@@ -107,24 +107,33 @@
         <!-- ===== MAIN ===== -->
         <main class="main-area">
             <div class="toolbar">
-                <button class="toolbar-btn" onclick="editor.undo()" title="Deshacer">
-                    <i class="fas fa-undo"></i>
-                </button>
-                <button class="toolbar-btn" onclick="editor.redo()" title="Rehacer">
-                    <i class="fas fa-redo"></i>
-                </button>
-                <div class="toolbar-separator"></div>
-                <button class="toolbar-btn" onclick="editor.zoomIn()" title="Acercar">
-                    <i class="fas fa-search-plus"></i>
-                </button>
-                <button class="toolbar-btn" onclick="editor.zoomOut()" title="Alejar">
-                    <i class="fas fa-search-minus"></i>
-                </button>
-                <span id="zoom-level" class="zoom-level">100%</span>
-                <div class="toolbar-separator"></div>
-                <button class="toolbar-btn" onclick="editor.resetCV()" title="Reiniciar">
-                    <i class="fas fa-trash-alt"></i> Reiniciar
-                </button>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <button class="toolbar-btn" onclick="editor.undo()" title="Deshacer" data-i18n-title="toolbar.undo"><i class="fas fa-undo"></i></button>
+                    <button class="toolbar-btn" onclick="editor.redo()" title="Rehacer" data-i18n-title="toolbar.redo"><i class="fas fa-redo"></i></button>
+                    <div class="toolbar-separator"></div>
+                    <button class="toolbar-btn" onclick="editor.zoomIn()" title="Acercar" data-i18n-title="toolbar.zoomIn"><i class="fas fa-search-plus"></i></button>
+                    <button class="toolbar-btn" onclick="editor.zoomOut()" title="Alejar" data-i18n-title="toolbar.zoomOut"><i class="fas fa-search-minus"></i></button>
+                    <span id="zoom-level" class="zoom-level">100%</span>
+                    <div class="toolbar-separator"></div>
+                    <button class="toolbar-btn" onclick="editor.resetCV()" title="Reiniciar"><i class="fas fa-trash-alt"></i> <span data-i18n="reset">Reiniciar</span></button>
+                </div>
+                <div style="margin-left:auto;">
+                    <div class="lang-dropdown" id="lang-dropdown">
+                        <button id="lang-current" class="lang-current" onclick="toggleLangDropdown(event)" title="Cambiar idioma">
+                            <span class="lang-flag flag-es"></span>
+                            <span class="lang-initials">ES</span>
+                            <i class="fas fa-chevron-down" style="font-size:0.6rem;margin-left:4px;opacity:.7"></i>
+                        </button>
+                        <div class="lang-menu">
+                            <button class="lang-btn" data-lang="es" onclick="setLanguage('es');document.getElementById('lang-dropdown').classList.remove('open')" title="Español — Paraguay">
+                                <span class="lang-flag flag-es"></span> ES <span style="opacity:.7;margin-left:4px;">Español (PY)</span>
+                            </button>
+                            <button class="lang-btn" data-lang="en" onclick="setLanguage('en');document.getElementById('lang-dropdown').classList.remove('open')" title="English — United States">
+                                <span class="lang-flag flag-us"></span> US <span style="opacity:.7;margin-left:4px;">English (US)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="cv-container">
